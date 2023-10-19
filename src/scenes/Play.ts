@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 
 import starfieldUrl from "/assets/starfield.png";
+import ufoURL from "/assets/ufo.png";
 
 export default class Play extends Phaser.Scene {
   fire?: Phaser.Input.Keyboard.Key;
@@ -13,6 +14,8 @@ export default class Play extends Phaser.Scene {
   rotationSpeed = Phaser.Math.PI2 / 1000; // radians per millisecond
   playerX?: number;
   playerY?: number;
+  // enemy?: Enemy;
+  isFiring: Boolean = false;
 
   constructor() {
     super("play");
@@ -20,6 +23,7 @@ export default class Play extends Phaser.Scene {
 
   preload() {
     this.load.image("starfield", starfieldUrl);
+    this.load.image("ufo", ufoURL);
   }
 
   #addKey(
@@ -37,6 +41,8 @@ export default class Play extends Phaser.Scene {
     this.playerY = gameLength - 50;
     this.playerX = 100;
 
+    // this.enemy = new Enemy(this, 100, 100, "ufo", 0, 30);
+
     this.starfield = this.add
       .tileSprite(0, 0, gameWidth, gameLength, "starfield")
       .setOrigin(0, 0);
@@ -52,23 +58,24 @@ export default class Play extends Phaser.Scene {
 
   update() {
     this.starfield!.tilePositionX -= 4;
-
-    if (this.left!.isDown) {
-      this.playerX! -= 5;
-      this.player!.setPosition(this.playerX, this.playerY, 0, 0);
+    if (!this.isFiring) {
+      if (this.left!.isDown) {
+        this.playerX! -= 5;
+        this.player!.setPosition(this.playerX, this.playerY, 0, 0);
+      }
+      if (this.right!.isDown) {
+        this.playerX! += 5;
+        this.player!.setPosition(this.playerX, this.playerY, 0, 0);
+      }
     }
-    if (this.right!.isDown) {
-      this.playerX! += 5;
-      this.player!.setPosition(this.playerX, this.playerY, 0, 0);
-    }
 
-    if (this.fire!.isDown) {
-      this.tweens.add({
-        targets: this.player,
-        scale: { from: 1.5, to: 1 },
-        duration: 300,
-        ease: Phaser.Math.Easing.Sine.Out,
-      });
+    // if (Phaser.Input.Keyboard.JustDown() && !this.isFiring) {
+    //   this.isFiring = true;
+    // }
+
+    if (this.playerY! >= 100) {
+      this.playerY! -= 5;
+      this.player!.setPosition(this.playerX, this.playerY, 0, 0);
     }
   }
 }
