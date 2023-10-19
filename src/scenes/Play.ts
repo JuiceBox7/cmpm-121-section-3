@@ -8,9 +8,11 @@ export default class Play extends Phaser.Scene {
   right?: Phaser.Input.Keyboard.Key;
 
   starfield?: Phaser.GameObjects.TileSprite;
-  spinner?: Phaser.GameObjects.Shape;
+  player?: Phaser.GameObjects.Shape;
 
   rotationSpeed = Phaser.Math.PI2 / 1000; // radians per millisecond
+  playerX?: number;
+  playerY?: number;
 
   constructor() {
     super("play");
@@ -30,33 +32,39 @@ export default class Play extends Phaser.Scene {
     this.fire = this.#addKey("F");
     this.left = this.#addKey("LEFT");
     this.right = this.#addKey("RIGHT");
+    const gameWidth = this.game.config.width as number;
+    const gameLength = this.game.config.height as number;
+    this.playerY = gameLength - 50;
+    this.playerX = 100;
 
     this.starfield = this.add
-      .tileSprite(
-        0,
-        0,
-        this.game.config.width as number,
-        this.game.config.height as number,
-        "starfield",
-      )
+      .tileSprite(0, 0, gameWidth, gameLength, "starfield")
       .setOrigin(0, 0);
 
-    this.spinner = this.add.rectangle(100, 100, 50, 50, 0xff0000);
+    this.player = this.add.rectangle(
+      this.playerX,
+      this.playerY,
+      50,
+      50,
+      0xddb400,
+    );
   }
 
-  update(_timeMs: number, delta: number) {
+  update() {
     this.starfield!.tilePositionX -= 4;
 
     if (this.left!.isDown) {
-      this.spinner!.rotation -= delta * this.rotationSpeed;
+      this.playerX! -= 5;
+      this.player!.setPosition(this.playerX, this.playerY, 0, 0);
     }
     if (this.right!.isDown) {
-      this.spinner!.rotation += delta * this.rotationSpeed;
+      this.playerX! += 5;
+      this.player!.setPosition(this.playerX, this.playerY, 0, 0);
     }
 
     if (this.fire!.isDown) {
       this.tweens.add({
-        targets: this.spinner,
+        targets: this.player,
         scale: { from: 1.5, to: 1 },
         duration: 300,
         ease: Phaser.Math.Easing.Sine.Out,
